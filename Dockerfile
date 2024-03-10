@@ -1,7 +1,6 @@
-  ARG OS_VERSION=3.19.1
+  ARG OS_VERSION
 # :: Header
   FROM alpine:${OS_VERSION}
-  
 # :: Run
   USER root
 
