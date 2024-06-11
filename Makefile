@@ -1,9 +1,9 @@
-os_ver=3.19
+os_ver=3.20.0
 .PHONY: build
 build-tagged:
 	docker build --pull --no-cache --build-arg OS_VERSION=${os_ver} --platform=linux/amd64,linux/arm64 -t nerethos/alpine:$(os_ver) -f ./Dockerfile .
 build-latest:
-	docker build --platform=linux/amd64,linux/arm64 -t nerethos/alpine:latest -f ./Dockerfile .	
+	docker build --build-arg OS_VERSION=${os_ver} --platform=linux/amd64,linux/arm64 -t nerethos/alpine:latest -f ./Dockerfile .	
 
 .PHONY: push
 push-tagged:
