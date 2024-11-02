@@ -1,20 +1,20 @@
-  ARG OS_VERSION
+ARG OS_VERSION
 # :: Header
-  FROM alpine:${OS_VERSION}
+FROM alpine:${OS_VERSION}
 # :: Run
-  USER root
+USER root
 
-  # :: update image
-    RUN set -ex; \
-      apk --no-cache add \
-        curl \
-        tzdata \
-        shadow; \
-      apk --no-cache upgrade;
+# :: update image
+RUN set -ex; \
+  apk --no-cache add \
+  curl \
+  tzdata \
+  shadow; \
+  apk --no-cache upgrade;
 
-  # :: create user
-    RUN set -ex; \
-      addgroup --gid 1000 -S appuser; \
-      adduser --uid 1000 -D -S -h / -s /sbin/nologin -G appuser appuser;
+# :: create user
+RUN set -ex; \
+  addgroup --gid 1000 -S appuser; \
+  adduser --uid 1000 -D -S -h / -s /sbin/nologin -G appuser appuser;
 
-  USER appuser
+USER appuser
