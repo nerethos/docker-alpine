@@ -1,0 +1,19 @@
+# .github/workflows/trigger-repo-b.yml
+name: Trigger Dependent Repos
+
+on:
+  workflow_dispatch:
+  registry_package:
+    types: [published, updated]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow in dependent
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.DOCKER_CI_PAT }}" \
+            ${{ secrets.DOWNSTREAM_REPO}} \
+            -d '{"event_type":"rebuild","client_payload":{"from":"docker-alpine","ref":"${{ github.ref }}"}}'
