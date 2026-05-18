@@ -13,7 +13,7 @@ on:
         - 'SECURITY.md'
         - 'PULL_REQUEST_TEMPLATE.md'
         - 'ISSUE_TEMPLATE.md'
-        - '.github/**'
+        - '.github/dependabot.yml'
   workflow_dispatch:
 
 jobs:
