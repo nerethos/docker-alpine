@@ -16,9 +16,6 @@ on:
         - '.github/**'
   workflow_dispatch:
 
-env:
-  REGISTRY_IMAGE: nerethos/docker-alpine
-
 jobs:
   build:
     permissions:
@@ -49,6 +46,9 @@ jobs:
           platform=${{ matrix.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
@@ -58,9 +58,9 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
         with:
-            registry: ghcr.io
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker meta
         id: meta
@@ -71,13 +71,10 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/alpine
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=sha,prefix=,suffix=,format=short
 
-      - name: Checkout code
-        uses: actions/checkout@v6
-
       - name: Set up QEMU
+        if: matrix.qemu
         uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
@@ -89,13 +86,10 @@ jobs:
         with:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          tags: |
-            ${{ github.repository_owner }}/alpine
-            ghcr.io/${{ github.repository_owner }}/alpine
           provenance: mode=max
           sbom: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=buildkit-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=buildkit-${{ env.PLATFORM_PAIR }}
           context: .
           file: Dockerfile
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
@@ -120,7 +114,7 @@ jobs:
       contents: read
       attestations: write
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - build
     steps:
@@ -140,9 +134,9 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
         with:
-            registry: ghcr.io
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -156,7 +150,6 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/alpine
           flavor: latest=true
           tags: |
-            type=semver,pattern={{version}},prefix=v
             type=sha,prefix=,suffix=,format=short
 
       - name: Create manifest list and push
